@@ -4,18 +4,16 @@ const router = express.Router()
 require('dotenv').config()
 
 const credentials = {
-    username:process.env.USERNAME,
-    apiKey:process.env.API_KEY
+    username: process.env.USERNAME,
+    apiKey: process.env.API_KEY
 }
 
-const afriTalking = require("africastalking")(credentials).USSD
+const afriTalking = require("africastalking")(credentials)
+
+const USSD = afriTalking.USSD
 
 
-
-
-
-console.log(afriTalking)
-
+// console.log(afriTalking, USSD)
 
 
 const app = express();
@@ -31,30 +29,54 @@ router.post('/', (req, res) => {
         text,
     } = req.body;
 
-    console.log(phoneNumber, text)
+    console.log(phoneNumber, text, sessionId, serviceCode)
 
 
     let response = '';
 
-    if (text == '') {
-        // This is the first request. Note how we start the response with CON
-        response = `CON What would you like to check
-        1. My account
-        2. My phone number`;
-    } else if ( text == '1') {
-        // Business logic for first level response
-        response = `CON Choose account information you want to view
-        1. Account number`;
-    } else if ( text == '2') {
-        // Business logic for first level response
-        // This is a terminal request. Note how we start the response with END
-        response = `END Your phone number is ${phoneNumber}`;
-    } else if ( text == '1*1') {
-        // This is a second level response where the user selected 1 in the first instance
-        const accountNumber = 'ACC100101';
-        // This is a terminal request. Note how we start the response with END
-        response = `END Your account number is ${accountNumber}`;
+    switch (text) {
+
+        case '':
+            response = `CON What would you like to check
+            1. My account
+            2. My phone number`
+            break;
+
+        case '1':
+            response = `CON Choose account information you want to view
+            1. Account number`
+            break;
+
+        case '2':
+            response = `END Your phone number is ${phoneNumber}`;
+            break;
+
+        case '1*1':
+            const accountNumber = 'ACC100101';
+            response = `END Your account number is ${accountNumber}`;
+        default:
+            break;
     }
+
+    // if (text == '') {
+    //     // This is the first request. Note how we start the response with CON
+    //     response = `CON What would you like to check
+    //     1. My account
+    //     2. My phone number`;
+    // } else if (text == '1') {
+    //     // Business logic for first level response
+    //     response = `CON Choose account information you want to view
+    //     1. Account number`;
+    // } else if (text == '2') {
+    //     // Business logic for first level response
+    //     // This is a terminal request. Note how we start the response with END
+    //     response = `END Your phone number is ${phoneNumber}`;
+    // } else if (text == '1*1') {
+    //     // This is a second level response where the user selected 1 in the first instance
+    //     const accountNumber = 'ACC100101';
+    //     // This is a terminal request. Note how we start the response with END
+    //     response = `END Your account number is ${accountNumber}`;
+    // }
 
     // Send the response back to the API
     res.set('Content-Type: text/plain');
